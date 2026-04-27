@@ -18,6 +18,9 @@ Jesse Boakye, Kenneth Son, Luis Zarate, Ralph Lewis
 ## Tech Stack
 Python · pandas · numpy · scikit-learn · matplotlib · seaborn · Streamlit · plotly
 
+## Plan
+Baseline: implementation plan PDF. Active deltas (feedback + EDA-driven): [docs/plan-adjustments.md](docs/plan-adjustments.md).
+
 ## Dataset
 [Spotify Music Dataset (Kaggle)](https://www.kaggle.com/datasets/solomonameh/spotify-music-dataset) — place CSV(s) under `data/` (gitignored).
 
