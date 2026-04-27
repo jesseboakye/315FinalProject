@@ -19,7 +19,7 @@ Jesse Boakye, Kenneth Son, Luis Zarate, Ralph Lewis
 Python · pandas · numpy · scikit-learn · matplotlib · seaborn · Streamlit · plotly
 
 ## Plan
-Baseline: implementation plan PDF. Active deltas (feedback + EDA-driven): [docs/plan-adjustments.md](docs/plan-adjustments.md).
+Baseline: implementation plan PDF. Active deltas (feedback + EDA-driven): [docs/plan-adjustments.md](docs/plan-adjustments.md). Phase plans: [Phase 3 — Clustering](docs/phase3-clustering-plan.md).
 
 ## Dataset
 [Spotify Music Dataset (Kaggle)](https://www.kaggle.com/datasets/solomonameh/spotify-music-dataset) — place CSV(s) under `data/` (gitignored).

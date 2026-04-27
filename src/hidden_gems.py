@@ -1,4 +1,4 @@
-"""Hidden gems: top-percentile-similar tracks below the user's average popularity."""
+"""Hidden gems: top-percentile-similar tracks below an adaptive popularity ceiling."""
 
 import numpy as np
 import pandas as pd
@@ -23,6 +23,7 @@ def hidden_gems(
     cutoff = np.quantile(out["similarity"], 1 - top_pct)
     candidates = out[out["similarity"] >= cutoff]
 
-    seed_pop = seed_df["track_popularity"].mean() if "track_popularity" in seed_df else 50
-    candidates = candidates[candidates["track_popularity"] < seed_pop]
+    if "track_popularity" in catalog and "track_popularity" in seed_df:
+        ceiling = min(catalog["track_popularity"].median(), seed_df["track_popularity"].mean())
+        candidates = candidates[candidates["track_popularity"] < ceiling]
     return candidates.nlargest(n, "similarity")

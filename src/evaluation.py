@@ -7,13 +7,37 @@ from sklearn.metrics.pairwise import cosine_similarity
 from .features import AUDIO_FEATURES
 
 
-def genre_consistency(recs: pd.DataFrame, seed_df: pd.DataFrame, col: str = "playlist_genre") -> float:
+def collapse_sparse_genres(
+    s: pd.Series,
+    catalog_genres: pd.Series | None = None,
+    min_count: int = 30,
+    other: str = "other",
+) -> pd.Series:
+    """Bucket genres with fewer than min_count tracks (in the catalog) into ``other``."""
+    counts = (catalog_genres if catalog_genres is not None else s).value_counts()
+    keep = set(counts[counts >= min_count].index)
+    return s.where(s.isin(keep), other)
+
+
+def genre_consistency(
+    recs: pd.DataFrame,
+    seed_df: pd.DataFrame,
+    col: str = "playlist_genre",
+    catalog: pd.DataFrame | None = None,
+    min_count: int = 30,
+) -> float:
     if col not in recs or col not in seed_df:
         return float("nan")
-    seed_genres = set(seed_df[col].dropna())
+    if catalog is not None and col in catalog:
+        ref = catalog[col]
+        seed_g = collapse_sparse_genres(seed_df[col], ref, min_count)
+        rec_g = collapse_sparse_genres(recs[col], ref, min_count)
+    else:
+        seed_g, rec_g = seed_df[col], recs[col]
+    seed_genres = set(seed_g.dropna())
     if not seed_genres:
         return 0.0
-    return recs[col].isin(seed_genres).mean()
+    return rec_g.isin(seed_genres).mean()
 
 
 def intra_list_diversity(recs: pd.DataFrame) -> float:

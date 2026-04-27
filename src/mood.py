@@ -1,18 +1,25 @@
-"""Rule-based mood classification from valence and energy."""
+"""Rule-based mood classification from valence and energy.
+
+Thresholds tuned from EDA: high at 0.6, low-valence at 0.35.
+"""
 
 import pandas as pd
 
+HIGH = 0.6
+LOW_VALENCE = 0.35
+LOW_ENERGY = 0.4
+
 
 def classify_mood(valence: float, energy: float) -> str:
-    if valence >= 0.6 and energy >= 0.6:
+    if valence >= HIGH and energy >= HIGH:
         return "Euphoric"
-    if valence >= 0.6 and energy < 0.6:
+    if valence >= HIGH and energy < HIGH:
         return "Chill & Happy"
-    if valence < 0.4 and energy >= 0.6:
+    if valence < LOW_VALENCE and energy >= HIGH:
         return "Dark & Intense"
-    if valence < 0.4 and energy < 0.4:
+    if valence < LOW_VALENCE and energy < LOW_ENERGY:
         return "Melancholic"
-    if energy >= 0.6:
+    if energy >= HIGH:
         return "Driven"
     return "Balanced"
 
