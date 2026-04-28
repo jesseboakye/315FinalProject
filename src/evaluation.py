@@ -77,4 +77,5 @@ def leave_one_out(
         "hit_rate_at_k": hits / n,
         "mean_rank": float(np.mean(ranks)) if ranks else float("nan"),
         "n": len(ranks),
+        "ranks": ranks,
     }

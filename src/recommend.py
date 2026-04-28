@@ -15,7 +15,7 @@ def recommend(
     catalog: pd.DataFrame,
     seed_df: pd.DataFrame,
     n: int = 10,
-    alpha: float = 0.85,
+    alpha: float = 0.95,
 ) -> pd.DataFrame:
     profile = user_profile(seed_df)
     sims = cosine_similarity(catalog[AUDIO_FEATURES].values, profile).ravel()
