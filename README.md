@@ -53,3 +53,6 @@ pip install -r requirements.txt
 ```bash
 streamlit run app/streamlit_app.py
 ```
+
+## End-to-end runbook
+**See [RUNBOOK.md](RUNBOOK.md)** — full step-by-step from fresh clone to running demo, with troubleshooting for the issues we've actually hit.
