@@ -2,18 +2,42 @@
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
 
 from .features import AUDIO_FEATURES
 
 
-def genre_consistency(recs: pd.DataFrame, seed_df: pd.DataFrame, col: str = "playlist_genre") -> float:
+def collapse_sparse_genres(
+    s: pd.Series,
+    catalog_genres: pd.Series | None = None,
+    min_count: int = 30,
+    other: str = "other",
+) -> pd.Series:
+    """Bucket genres with fewer than min_count tracks (in the catalog) into ``other``."""
+    counts = (catalog_genres if catalog_genres is not None else s).value_counts()
+    keep = set(counts[counts >= min_count].index)
+    return s.where(s.isin(keep), other)
+
+
+def genre_consistency(
+    recs: pd.DataFrame,
+    seed_df: pd.DataFrame,
+    col: str = "playlist_genre",
+    catalog: pd.DataFrame | None = None,
+    min_count: int = 30,
+) -> float:
     if col not in recs or col not in seed_df:
         return float("nan")
-    seed_genres = set(seed_df[col].dropna())
+    if catalog is not None and col in catalog:
+        ref = catalog[col]
+        seed_g = collapse_sparse_genres(seed_df[col], ref, min_count)
+        rec_g = collapse_sparse_genres(recs[col], ref, min_count)
+    else:
+        seed_g, rec_g = seed_df[col], recs[col]
+    seed_genres = set(seed_g.dropna())
     if not seed_genres:
         return 0.0
-    return recs[col].isin(seed_genres).mean()
+    return rec_g.isin(seed_genres).mean()
 
 
 def intra_list_diversity(recs: pd.DataFrame) -> float:
@@ -29,9 +53,19 @@ def leave_one_out(
     catalog: pd.DataFrame,
     seed_df: pd.DataFrame,
     k: int = 10,
+    metric: str = "cosine",
 ) -> dict:
+    """Drop one seed, rebuild the profile from the rest, rank the held-out track.
+
+    `metric` is the ranking metric — "cosine" (descending similarity) or "euclidean"
+    (ascending distance). The returned `avg_recovered_similarity` is always cosine,
+    since it's a sanity check on similarity regardless of which metric drove the rank.
+    """
+    if metric not in {"cosine", "euclidean"}:
+        raise ValueError(f"unknown metric: {metric!r}")
     hits = 0
-    ranks = []
+    ranks: list[int] = []
+    recovered_sims: list[float] = []
     for i in seed_df.index:
         held_out = seed_df.loc[[i]]
         remaining = seed_df.drop(index=i)
@@ -39,8 +73,13 @@ def leave_one_out(
             continue
         profile = remaining[AUDIO_FEATURES].mean().values.reshape(1, -1)
         pool = catalog.drop(index=remaining.index, errors="ignore")
-        sims = cosine_similarity(pool[AUDIO_FEATURES].values, profile).ravel()
-        order = np.argsort(-sims)
+        X = pool[AUDIO_FEATURES].values
+        if metric == "cosine":
+            scores = cosine_similarity(X, profile).ravel()
+            order = np.argsort(-scores)
+        else:
+            scores = euclidean_distances(X, profile).ravel()
+            order = np.argsort(scores)
         target_pos = pool.index.get_loc(held_out.index[0]) if held_out.index[0] in pool.index else None
         if target_pos is None:
             continue
@@ -48,9 +87,13 @@ def leave_one_out(
         ranks.append(rank)
         if rank <= k:
             hits += 1
+        recovered_sims.append(float(cosine_similarity(held_out[AUDIO_FEATURES].values, profile).ravel()[0]))
     n = len(ranks) or 1
     return {
         "hit_rate_at_k": hits / n,
         "mean_rank": float(np.mean(ranks)) if ranks else float("nan"),
+        "avg_recovered_similarity": float(np.mean(recovered_sims)) if recovered_sims else float("nan"),
         "n": len(ranks),
+        "ranks": ranks,
+        "metric": metric,
     }

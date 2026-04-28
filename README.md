@@ -18,6 +18,9 @@ Jesse Boakye, Kenneth Son, Luis Zarate, Ralph Lewis
 ## Tech Stack
 Python · pandas · numpy · scikit-learn · matplotlib · seaborn · Streamlit · plotly
 
+## Plan
+Baseline: implementation plan PDF. Active deltas (feedback + EDA-driven): [docs/plan-adjustments.md](docs/plan-adjustments.md). Phase plans: [Phase 3 — Clustering](docs/phase3-clustering-plan.md).
+
 ## Dataset
 [Spotify Music Dataset (Kaggle)](https://www.kaggle.com/datasets/solomonameh/spotify-music-dataset) — place CSV(s) under `data/` (gitignored).
 
@@ -50,3 +53,6 @@ pip install -r requirements.txt
 ```bash
 streamlit run app/streamlit_app.py
 ```
+
+## End-to-end runbook
+**See [RUNBOOK.md](RUNBOOK.md)** — full step-by-step from fresh clone to running demo, with troubleshooting for the issues we've actually hit.
