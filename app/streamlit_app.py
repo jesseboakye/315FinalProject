@@ -104,7 +104,7 @@ with left:
                 tid = row["track_id"]
                 already = tid in st.session_state.selected
                 full = len(st.session_state.selected) >= MAX_SEEDS
-                label = f"{row['track_name']} — {row['track_artist']}  ·  {row['playlist_genre']}"
+                label = f"{row['track_name']} — {row['track_artist']}"
                 st.button(
                     f"{'✓' if already else '+'} {label}",
                     key=f"add_{tid}",
@@ -269,7 +269,6 @@ def _format_recs(recs: pd.DataFrame, include_pop: bool = False) -> pd.DataFrame:
     cols = {
         "track_name": "Track",
         "track_artist": "Artist",
-        "playlist_genre": "Genre",
         "similarity": "Similarity",
     }
     if include_pop:
@@ -286,7 +285,7 @@ _RECS_CACHE: dict = {}
 def _compute_recs() -> pd.DataFrame:
     if "df" not in _RECS_CACHE:
         recs = recommend(df_scaled, seed_scaled, n=10).join(
-            df_raw[["track_name", "track_artist", "playlist_genre", "track_popularity"]],
+            df_raw[["track_name", "track_artist", "track_popularity"]],
             rsuffix="_raw",
         )
         _RECS_CACHE["df"] = recs
@@ -319,7 +318,7 @@ def section_hidden_gems() -> None:
     )
     rec_idx = list(_compute_recs().index)
     gems = hidden_gems(df_scaled, seed_scaled, top_pct=0.10, n=8, exclude=rec_idx).join(
-        df_raw[["track_name", "track_artist", "playlist_genre", "track_popularity"]],
+        df_raw[["track_name", "track_artist", "track_popularity"]],
         rsuffix="_raw",
     )
     if gems.empty:

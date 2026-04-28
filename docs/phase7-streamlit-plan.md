@@ -59,8 +59,8 @@ Single scrollable page (no multi-page nav — judges shouldn't have to click "ne
 
 ### 5. Top Recommendations
 - Top 10 from `recommend(catalog, seed)` (default α = 0.95).
-- Table: rank, track, artist, genre, similarity bar (visual % via `st.progress`-equivalent or column config).
-- Captions explain the ranking is based on cosine similarity to the user's average audio profile.
+- Table: rank, track, artist, similarity bar (visual % via column config).
+- **No genre column** — the dataset's `playlist_genre` tags songs with the genre of the playlist they were scraped from, not the song's own genre, which produces visibly wrong per-track labels. See [plan-adjustments.md → Phase 7](plan-adjustments.md). Captions explain the ranking is based on cosine similarity to the user's average audio profile.
 
 ### 6. Hidden Gems
 - Top 5 from `hidden_gems(catalog, seed)`.

@@ -44,6 +44,21 @@ Popularity is a continuous distribution, not two clean buckets. Use the **lower 
 
 Combined with the top-percentile similarity filter, gems are: high similarity AND popularity below `min(median, user_avg)`.
 
+### Phase 7 — Genre column hidden from per-track displays
+
+The Kaggle dataset's `playlist_genre` column tags each track with the genre of the *Spotify playlist it was scraped from*, not the song's own genre. The same song appears under different labels depending on the source playlist. Concrete cases surfaced during the demo:
+
+- Lil Baby's *Freestyle* tagged `arabic` — scraped from a playlist named "Arab X".
+- Gunna's *fukumean* tagged `gaming` — scraped from "Top Gaming Tracks", a playlist that also contains Taylor Swift, Charli xcx, and Travis Scott.
+
+We explored four corrections (album-majority, artist-majority, hybrid, conservative-agreement). All have failure modes: album-majority misses single-track albums (75 fixes, leaves *Freestyle* wrong); artist-majority overrides correctly-labeled tracks (171 fixes but regresses *HIM ALL ALONG* from `hip-hop` to `gaming`); none fix artists like Asake whose entire catalog representation came from the wrong source playlists.
+
+**Decision: hide the genre column from per-track displays in the Streamlit demo.** Cleanest "do less" answer. The recommendations and hidden-gems tables show **Track · Artist · Similarity** only; the song-picker search results show **Track · Artist**. The audio-feature-driven engine (clustering, recs, gems) was never affected by the noise — this is purely a display decision.
+
+What stays: the aggregate genre summary on Slide 1 ("Your Music in Numbers") still shows top genre and the genre bar chart over the user's selection. Aggregate label noise on a 3–10 song selection is small and still informative for the user.
+
+What this means for the report: explicitly call out the dataset limitation. Audio-feature recs are acoustically correct; the labels in the source data are not reliable enough to display per-track without misleading viewers.
+
 ### Phase 6 — Sparse genre handling for evaluation
 
 Genre distribution is heavily skewed: top genres (electronic, pop, latin, hip-hop, ambient, rock, lofi) have 300–560 tracks each, while sparse genres (disco, country, mandopop, soca) have only a handful. For the **genre consistency** metric, group all sparse genres (e.g., < 30 tracks) into an `"other"` bucket before computing match rate — otherwise the metric is dominated by tiny-sample noise.
